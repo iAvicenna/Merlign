@@ -1,5 +1,6 @@
-*.session
-*.ycm_extra_conf.py
+.ctags
+.session
+.ycm_extra_conf.py
 tags
 TO_DO.txt
 /myexamples/
