@@ -62,7 +62,7 @@ other references against the given read.
 								 
 Each read's ends are compared against a list of MIDs and their
 reverse complements to demultiplex the reads. mid_start and mid_buffer determin
-which part of the read is checked for MID alignment. See section Parameters.
+which part of the read is checked for MID alignment. See [Parameters](#parameters) section.
 These extended ends are aligned to the MIDs using edlib which is a blazingly fast alignment
 library that uses Levenshtein distance. mid_stop_when works in a similar way to 
 stop_when (default 1) above to stop looking at MIDs when the number of mismatches is lower or equal
@@ -188,7 +188,7 @@ the reference, which is a sum of per position quality based errror rates.
 
 <b>--merged_path (-M)</b>: If supplied, writes merged sequences and qualities to here. Otherwise it sends it to stdout.
 
-<b>--output_path (-0)</b>: Path of the .csv outputs file (see Outputs section).
+<b>--output_path (-0)</b>: Path of the .csv outputs file (see [Outputs](#outputs) section).
 
 <b>--match (-q), --mismatch (-w), --gap_open/extend (-e/-r), --end_free1/free2 (-t/-y), 
 --begin_free1/free2 (-u/-i)</b>: alignment penalty parameters supplied to WFA2 where 1 and 2 
@@ -200,7 +200,7 @@ reads (default: 0, 1, 6/4, 0/0, 0/0).
 
 <b>--qtype (-Q)</b>: quality type of the file could be one of Solexa+64, Phred+33, Phred+64 (default: Phred+33).
 
-<b>--trim (-T)</b>: If 1, trims merged paired reads or not (see Introduction for details, default: 1).
+<b>--trim (-T)</b>: If 1, trims merged paired reads or not (see [Introduction](#introduction) for details, default: 1).
 
 <b>--mask_threshold (-K)</b>: If merged quality of the paired read is lower than this value, the letter
 at this position is recorded as a lower case letter for identification in downstream analysis (default: 30)
@@ -212,7 +212,7 @@ if supplied. otherwise to stdout, default: 0)
 
 --reads (-F): path to the reads file
 
---output (-G): path of the .csv file for outputs (see section Outputs).
+--output (-G): path of the .csv file for outputs (see [Outputs](#outputs) section).
 
 --mids (-A): path for the MID files. If not supplied MID identification is skipped.
 
