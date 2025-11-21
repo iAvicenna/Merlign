@@ -1,0 +1,2 @@
+read_id,M1_index, M1_start, M1_end, M1_match, M1_mismatch, M1_deletion,M1_insertion,M2_index, M2_start, M2_end, M2_match, M2_mismatch, M2_deletion,M2_insertion,align_index, align_cigar, align_mods, align_mod_quals, align_av_err
+Seq1,0,0,9,10,0,0,0,1,222,233,11,0,0,1,0, 16M1X66M1I11M1D39M1I81M,T C ,"J J ",0.059267

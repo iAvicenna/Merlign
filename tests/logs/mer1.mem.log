@@ -1,0 +1,13 @@
+==66013== Memcheck, a memory error detector
+==66013== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==66013== Using Valgrind-3.21.0.GIT and LibVEX; rerun with -h for copyright info
+==66013== Command: ../src/mer --file1 ./test_files/example_file1_R1.fastq.gz --file2 ./test_files/example_file1_R2.fastq.gz --N1 100
+==66013== 
+==66013== 
+==66013== HEAP SUMMARY:
+==66013==     in use at exit: 0 bytes in 0 blocks
+==66013==   total heap usage: 319 allocs, 319 frees, 9,342,405 bytes allocated
+==66013== 
+==66013== All heap blocks were freed -- no leaks are possible
+==66013== 
+==66013== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

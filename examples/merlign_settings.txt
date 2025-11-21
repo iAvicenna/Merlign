@@ -1,0 +1,11 @@
+mer
+--end_free1 100
+--end_free2 100
+--begin_free1 100
+--begin_free2 100
+--read_begin_free 18
+--read_end_free 18
+--ref_begin_free 6
+--ref_end_free 6
+ign
+--reference_stop_when 0.99

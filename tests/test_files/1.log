@@ -1,0 +1,13 @@
+
+Start time: Thu Apr  6 20:15:28 2023 (UT: 1680808528).
+sequences file1 path=../tests/test_files/example_file1_R1.fastq.gz, sequences file2 path=../tests/test_files/example_file1_R2.fastq.gz, maxN=-1
+adapters path = ../tests/test_files/adapters.fasta
+output path = ./logs/output1.csv
+merged sequences path = ./logs/merged1.fastq
+
+penalties: 
+match=0, mismatch=1, gap open=10, gap extension=2, ends_free=100
+
+adapter_start 200, adapter_end 260
+
+10000 sequences in T = 0.614362 seconds.

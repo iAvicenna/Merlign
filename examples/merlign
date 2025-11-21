@@ -1,0 +1,733 @@
+#!/bin/bash
+
+set -euf -o pipefail
+
+# versioning first digit: major change or many minor changes 
+# accumulated second digit feature additions, last digit bug 
+# fixes formatting. keep version fixed if changes are very 
+# minor such as typos in comments etc. starts from 1.0.0
+VERSION=1.3.1
+
+# should point to where merlign src resides
+SRC="/home/avicenna/Dropbox/local_packages/merlign/src/"
+
+
+INFO="
+###############################################################
+#                           merlign                           #
+#                                                             #
+# A bash pipeline for running mer and ign from the merlign    #
+# package (python). ./logs ./outputs ./refs should exist      #
+# in the project directory. ./refs should minimally contains  #
+# REFs (inserts to align to) and can also contain MIDs.       #
+# sequences should be named as *_R1_*.fastq*, *_R2_*.fastq*   #
+# The numeric part of the match until first _ is used as the  #
+# id of the output, for instance TB15_*_R1_*.fastq* -> 15.    #
+# parameters for mer and ign can be given in a merlign_       #
+# settings.txt file (see function on how to format).          #
+#                                                             #
+# For copyright info call the program with the -g flag        #
+# For help call the program with the -h flag                  #
+#                                                             #
+#                       Change History                        #
+#                                                             #
+# Current version $VERSION                                       #                        
+#                                                             #
+# 27/06/2025 Sina Tureli version 1.0.0: Initial script        #
+# 28/06/2025 Sina Tureli version 1.1.0: added mids support    #
+#                                       corrected usage for   #
+#                                       global vars, extended #
+#                                       INFO                  #
+# 29/06/2025 Sina Tureli version 1.2.0: addded merlign sett.  #
+#                                       parse support.        #
+#                                       set - changes. fixed  #
+#                                       formatting for multi  #
+#                                       line str args.        #
+# 01/07/2025 Sina Tureli version 1.3.0: extended help()       #
+#                                       improved parse_sett.  #
+# 02/07/2025 Sina Tureli version 1.3.1: some cleanup          #
+#                                       impr. comments        #
+#                                                             #
+###############################################################"
+
+GPL="
+###############################################################
+#                                                             #
+# Copyright (C) 2025 Sina Tureli                              #
+# st757@cam.ac.uk                                             #
+#                                                             #
+# This program is free software; you can redistribute it      #
+# and/or modify it under the terms of the GNU General Public  #
+# License as published by the Free Software Foundation;       #
+# either version 3 of the License, or (at your option) any    #
+# later version.                                              #
+#                                                             #
+# This program is distributed in the hope that it will be     #
+# useful, but WITHOUT ANY WARRANTY; without even the implied  #
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR     #
+# PURPOSE. See the GNU General Public License for more        #
+# details.                                                    #
+#                                                             #
+# If you have not received a copy of the GNU General Public   #
+# License along with this program, please visit               #
+# <https://www.gnu.org/licenses/>.                            #
+###############################################################
+"
+
+
+###############################################################
+###############################################################
+#                   Utility Functions                         #
+###############################################################
+###############################################################
+                                                               
+print_date(){
+  now=$(date)
+    ut=$(date +%s)
+  echo "Date: $now (UT: $ut)"
+}
+
+# convert TRUE or FALSE string to corresponding command
+# note that true and false are commands that return 0 and 1
+# respectively and would evaluate expected if used with if
+# without brackets
+boolean() {
+    
+  case ${1^^} in
+    TRUE) echo true ;;
+    FALSE) echo false ;;
+    *) echo "Error: Unknown boolean value $1. Should be TRUE or FALSE" 1>&2; 
+       exit 3 ;;
+   esac
+}
+
+# convertes strings TRUE and FALSE to 0 or 1
+boolean_to_int() {
+    
+  case ${1^^} in
+    TRUE) echo 1 ;;
+    FALSE) echo 0 ;;
+    *) echo "Error: Unknown boolean value $1. Should be TRUE or FALSE" 1>&2; 
+       exit 3 ;;
+   esac
+}
+
+check_root()
+{
+if [ "$(id -u)" != 0 ]; then
+  echo "ERROR: You must be root user to run this program"
+  exit 2
+fi
+}
+
+check_that_directories_exist() {
+
+  local directories=("$@")
+
+  for dir in "${directories[@]}"; do
+    if [ ! -d "$dir" ]; then
+      echo "Directory '$dir' does not exist."
+      exit 4
+    fi
+  done
+
+}
+
+check_that_files_exist() {
+  local files=("$@")
+
+  for file in "${files[@]}"; do
+    if [ ! -f "$file" ]; then
+      echo "File '$file' does not exist."
+      exit 4
+    fi
+  done
+}
+
+
+print_init_info(){
+
+    local project_name="$1"
+    local N0="$2"
+    local N1="$3"
+    local njobs="$4"
+    local gzip="$5"
+    local Q="$6"
+    local seqs_dir="$7"
+    local proj_dir="$8"
+    local mer_settings="$9"
+    local ign_settings="${10}"
+
+    now=$(date)
+    ut=$(date +%s)
+
+    echo "Project start time: ${now} (UT: ${ut})." 
+    echo "Project name: ${project_name}"
+    echo "Project dir: ${proj_dir}"
+    { 
+      echo "logs dir: ${logs_dir}";\
+      echo "outputs dir: ${outputs_dir}";\
+      echo "fasta dir: ${fasta_dir}";\
+      echo "seqs_dir: ${seqs_dir}";\
+      echo "mer_settings: ${mer_settings}";\
+      echo "ign_settings: ${ign_settings}";\
+      echo -e "N0: ${N0}, N1: ${N1}, njobs: ${njobs}, gzip: ${gzip}, Q: ${Q}";\
+      free -m | awk 'NR==2{printf "Memory Usage: %s/%sMB (%.2f%%)\n\n", $3,$2,$3*100/$2 }';\
+     } 
+
+}
+
+
+print_end_info(){
+
+    now=$(date)
+    ut=$(date +%s)
+    
+    { echo -e "\nProject end date: ${now} (UT: ${ut}).";\
+    free -m | awk 'NR==2{printf "Memory Usage: %s/%sMB (%.2f%%)\n", $3,$2,$3*100/$2 }';\
+    } 
+
+}
+
+# update settings. if a setting doesnt
+# exist, add it. if it exists overwrite it.
+# settings should be of the form --arg val
+# default could be --arg1 val1 --arg2 val2
+# and new=--arg1 val_new would update arg1
+# or new=--arg3 val would insert a new 
+# settings to default.
+
+update_settings(){
+    
+    local default="$1"
+    local new="$2"
+    local key
+    
+    key=$(awk '{print $1}' <<< "$new")
+    
+    if [[ $default == "${key} "* ]]; then
+        default=$(sed -E "s|$key [^ ]+|$new|" <<< "$default")
+    else    
+        default="$default $new"
+    fi
+    
+    echo "$default"
+
+}
+
+# supply a settings file which should be of the format 
+# mer
+# --arg1 val1
+# --arg2 val2
+# --arg3 val3
+# ign
+# --arg1 val1
+# --arg2 val2
+#
+# which would then replace the global mer_settings
+# and ign_settings variables which should be of the form
+# "--arg1 val1 --arg2 val2" etc. Existing keys are updated
+# non-existing ones are inserted.
+
+parse_merlign_settings(){
+
+    local file="$1"
+    current="start"
+    
+    if [ -f "$file" ]; then
+        
+      while read -r line; do
+   
+        line=$(echo "$line" | tr -d '\n\r\t')
+      
+        case "$line" in mer|ign)
+            current="$line"
+            continue
+            ;;
+        esac
+        
+        if [[ $current == "mer" ]]; then
+            mer_settings="$(update_settings "$mer_settings" "$line")"
+        elif [[ $current == "ign" ]]; then
+            ign_settings="$(update_settings "$ign_settings" "$line")"
+        fi  
+        
+      done < "$file"
+      
+    fi
+    
+}
+
+# utility helper to join long string arguments without extra space
+# and without crawling along the left border 
+join () {
+    printf '%s' "$@"
+}
+
+###############################################################
+#              End of Utility Functions                       #
+###############################################################
+
+###############################################################
+#              Initialization and Arg Parser                  #
+###############################################################
+
+# Process user inputs
+parse_arguments() {
+
+  # initialize variables
+  verbose=true
+  debug=false
+  test=false
+  N0="0"
+  N1="-1"
+  gzip=true
+  njobs="6"
+
+  Q=40
+  settings_file=""
+  
+  # Get the options
+                    
+  while getopts ":ghVid:v:t:S:E:z:N:Q:s:" option; do
+
+    case $option in
+
+      h) # display Help
+        help
+        exit;;
+
+      V) # print version
+        echo "version $VERSION"
+        exit;;
+
+      i) # print info
+        echo "$INFO"
+        exit;;
+
+      g) # print GPL
+        echo "$GPL"
+        exit;;
+
+      v) # verbose TRUE or FALSE as string
+        verbose=$(boolean "${OPTARG}");;
+
+      d) # debug TRUE or FALSE as string
+        debug=$(boolean "${OPTARG}");;
+        
+      t) # test script
+        test=$(boolean "${OPTARG}");;
+        
+      S) # index of starting sequence
+        N0="${OPTARG}";;
+        
+      E) # index of finishing sequence
+        N1="${OPTARG}";;
+        
+      z) # zip outputs TRUE or FALSE as string
+        gzip=$(boolean "${OPTARG}");;
+        
+      N) # number of jobs to allocate
+        njobs="${OPTARG}";;
+        
+      Q) # filtering quality value
+        Q="${OPTARG}";;
+        
+      s) # settings file path 
+        settings_file="${OPTARG}";;
+
+      \?) # incorrect option
+        echo "Error: Invalid option -${OPTARG}. Use -h for help with arguments."
+        exit 3 ;;
+
+    esac
+  done
+}
+
+# print help information
+help()
+{
+  # Display Help
+  echo "Syntax: ${BASH_SOURCE[0]:2} [-g|h|V|i] [-d|t|v|z TRUE or FALSE] [-Q|S|E|N <int>] [-s <path>] <seqs_dir> <proj_dir> <proj_name>"
+  echo "options:"
+  echo "-g Print the GPL license notification."
+  echo "-h Print this help."
+  echo "-V Print software version and exit."
+  echo "-i Print software info and exit."
+  echo "-d if TRUE print debug info"
+  echo "-t if TRUE run tests"
+  echo "-v if TRUE work in verbose mode"
+  echo "-Q quality filtering value"
+  echo "-S, E take sequences from s to e (default of 0 and -1 takes every sequence)."
+  echo "-N number of jobs to allocate"
+  echo "-s Settings file for mer|ign. Contents should be of the form: "
+  echo "   mer"
+  echo "   -arg1 val1" 
+  echo "   ... "
+  echo "   ign "
+  echo "   -arg1 val1" 
+  echo "   ..."
+  echo "<seqs_dir> is where fast sequences are and they should be in R1 R2 format or just R1"
+  echo "<proj_dir> is where the outputs will be produced. must contain folders logs, outputs, refs."
+  echo "           refs folder must atleast containts REFs.fasta and possibly MIDs.fasta"
+  echo "<proj_name> is the name of the project, used for log naming"
+  echo
+}
+
+
+###############################################################
+# Some tests, don't add a test containing -t it will lead to  # 
+# infinite recursion.                                         #
+###############################################################
+
+clean_test_folder(){
+    
+    local bin_test_folder="$1"
+    
+    cd "/tmp/"
+  
+    if [[ -d "${bin_test_folder}" ]]
+    then
+        rm -r "${bin_test_folder}"
+    fi
+    
+    cd - > /dev/null
+}
+
+# clean the temporary folder created for testing purposes
+# when a test fails (exit code 5)
+test_fail_cleanup() {
+
+  local status=$?
+    
+  if [[ $status -eq 5 ]]
+  then
+    echo "Script exited with test fail, cleaning my mess up."
+    
+    clean_test_folder "$1"
+  
+  fi
+    
+}
+
+# create file required for testing and return their paths
+make_test_files(){
+  
+  bin_test_folder=$(mktemp -d --tmpdir "merlign_bin_test_folder.XXXXXX" | sed 's|/tmp/||')
+  
+  mkdir "/tmp/${bin_test_folder}/seqs_dir/" > /dev/null
+  mkdir "/tmp/${bin_test_folder}/logs/" > /dev/null
+  mkdir "/tmp/${bin_test_folder}/refs/" > /dev/null
+  mkdir "/tmp/${bin_test_folder}/outputs/" > /dev/null
+  mkdir "/tmp/${bin_test_folder}/settings.txt"
+  
+  touch "/tmp/${bin_test_folder}/refs/REFs.fasta" > /dev/null
+  touch "/tmp/${bin_test_folder}/refs/MIDs.fasta" > /dev/null
+  touch "/tmp/${bin_test_folder}/seqs_dir/1_R1.fastq" > /dev/null
+  touch "/tmp/${bin_test_folder}/seqs_dir/1_R2.fastq" > /dev/null
+  touch "/tmp/${bin_test_folder}/outputs/align_output1.csv" > /dev/null
+  
+  echo "$bin_test_folder"
+
+}
+
+
+run_test(){
+  MSG="Test Mode"
+  echo "$MSG"
+  print_date  
+  echo ""
+
+  echo "Testing -h"
+  bash "${BASH_SOURCE[0]}" -h
+  echo ""
+
+  echo "Testing -V"
+  bash "${BASH_SOURCE[0]}" -V
+  echo ""
+
+  echo "Testing -g"
+  bash "${BASH_SOURCE[0]}" -g
+  echo ""
+
+  echo "Testing -i"
+  bash "${BASH_SOURCE[0]}" -i
+  echo ""
+  
+  set +e # this section must run through errors
+
+  echo "Testing invalid"
+  bash "${BASH_SOURCE[0]}" -x
+  ret1=$?
+  bash "${BASH_SOURCE[0]}" -v 1
+  ret2=$?
+  bash "${BASH_SOURCE[0]}" -d T
+  ret3=$?
+  bash "${BASH_SOURCE[0]}"
+  ret4=$?
+  bash "${BASH_SOURCE[0]}" "seqs_dir_spoof" "proj_dir" "proj_name"
+  ret5=$?
+  bash "${BASH_SOURCE[0]}" "seqs_dir_spoof" 
+  ret6=$?
+
+  set -e
+  
+  if [[ "$ret1" == 3 && "$ret2" == 3 && "$ret3" == 3 && "$ret4" == 3 \
+         && "$ret5" == 4 && "$ret6" == 3 ]]
+  then
+    echo "Testing invalid succesful."
+  else
+    echo "Not all exit return values are correct. Testing invalid failed"
+    exit 5
+  fi
+  echo ""
+
+  echo "Testing functionality"
+  
+  read -r bin_test_folder<<< "$(make_test_files)"
+  trap 'test_fail_cleanup "$bin_test_folder"' EXIT SIGQUIT
+  
+  # this section must run through errors
+  # testing checks for return values and cleans 
+  # if it is test fail
+  set +e
+  
+  test_settings_file="/tmp/${bin_test_folder}/merlign_settings"
+  echo "mer" > "$test_settings_file"
+  
+  { echo "--end_free1 200"; echo "ign"; echo "--gap_open 5";\
+    echo "--ref_end_free 4"; echo "--extra b"; } >> "${test_settings_file}"
+  
+  
+  bash "${BASH_SOURCE[0]}" -v TRUE -d TRUE -s "${test_settings_file}"\
+        "/tmp/${bin_test_folder}/seqs_dir" "/tmp/${bin_test_folder}" "test_proj"\
+        > "/tmp/${bin_test_folder}"/test_proj.log
+        
+  out=$(tail -n 2 "/tmp/${bin_test_folder}"/test_proj.log | tr '\n\r' ' ' | xargs)
+    
+  ret=$?
+    
+  if [[ "$ret" == 0 && $out == "mer_settings: --end_free1 200 --end_free2 100 --begin_free1 100 --begin_free2 100 ign_settings: --gap_open 5 --gap_extend 2 --read_begin_free 84 --read_end_free 84 --ref_begin_free 6 --ref_end_free 6 --ref_end_free 4 --extra b" ]]
+  then
+    echo "Test completed succesfully."
+  else
+    echo "Test failed with return value ${ret} and out ${out}."
+    exit 5
+  fi
+  
+  check_that_files_exist "/tmp/${bin_test_folder}/test_proj.log"
+  
+  set -e
+  
+  
+  # clean test files if everything ran succesfully
+  clean_test_folder "${bin_test_folder}"
+  
+  echo
+  echo "All tests completed succesfully".
+  exit
+  
+  }
+
+
+run_debug(){
+
+  echo "Debug Mode:"
+  print_date
+  echo 
+
+  echo "version: $VERSION"
+  echo "debug $debug"
+  echo "verbose $verbose"
+  echo "test $test"
+  echo 
+  
+  echo "args:" "$1"                
+  echo "mer_settings:" "$2"
+  echo "ign_settings:" "$3"
+  
+}
+
+
+###############################################################
+###############################################################
+#                      Main Program                           #
+###############################################################
+###############################################################
+
+call_merlign(){
+
+    local gzip verbose debug
+
+    local seqs_dir="$1"
+    local N0="$2"
+    local N1="$3"
+    debug=$(boolean_to_int "$4")
+    gzip=$(boolean "$5")
+    verbose=$(boolean "$6")
+    local Q="$7"
+    
+    set +f
+    r1_files=("$seqs_dir"/*_R1*fastq*)
+    set -f
+    
+    for r1_file in "${r1_files[@]}"; do
+        r2_file="${r1_file/_R1/_R2}"
+        
+        filename=$(basename "$r1_file")  
+        
+        # match longest possible _* from the end of file name
+        # take the rest. So if it is like TB10_S10_R1.fastq, it
+        # takes TB10. 
+        prefix="${filename%%_*}"
+        
+        #replace non-integers with empty so we are only left with integers
+        id="${prefix//[!0-9]/}"
+    
+        #if id is not found print message and skip
+        if [[ ${#id} -eq 0 ]]
+        then
+            echo "ID can not be assigned to file name $r1_file, skipping."
+            continue
+        fi
+        
+        echo "mer settings ${mer_settings}"
+        echo "ign settings ${ign_settings}"
+
+        # Check that the R2 file exists and print info about it
+        # then add it to pipeline
+        if [[ -f "$r2_file" && ${verbose} == true ]]
+        then
+            echo "Pair:" 
+            echo "R1: $r1_file" 
+            echo "R2: $r2_file" 
+            echo "assigned ID ${id}"
+            echo "----" 
+                        
+            mer="$( join "${SRC}/mer "\
+                            "--file1 ${r1_file} "\
+                            "--file2 ${r2_file} "\
+                            "--output ${outputs_dir}/merge_output${id}.csv "\
+                            "--mask_threshold ${Q} "\
+                            "--N0 ${N0} "\
+                            "--N1 ${N1} "\
+                            "--merge_debug ${debug}"
+                  )"
+                            
+            # mer sends info messages to stderr because stdout is used to pass data around
+            mer="${mer} ${mer_settings} 2> ${logs_dir}/merge${id}.log"
+
+            ign="$(join "${SRC}/ign "\
+                        "--output ${outputs_dir}/align_output${id}.csv "\
+                        "--references ${fasta_dir}/REFs.fasta "\
+                        "--gap_open 2 "\
+                        "--gap_extend 2 "\
+                        "--read_begin_free 84 "\
+                        "--read_end_free 84 "\
+                        "--ref_begin_free 6 "\
+                        "--ref_end_free 6 "\
+                        "--alignment_debug ${debug} "\
+                        "--references ${fasta_dir}/REFs.fasta"
+                  )"
+                        
+            
+            if [ ! -f "${fasta_dir}/MIDs.fasta" ]
+            then
+                args="${ign_settings}"
+            else
+                echo "MIDs found at ${fasta_dir}/MIDs.fasta, adding to the args"
+                args="${ign_settings} --mids ${fasta_dir}/MIDs.fasta \
+                      --mid_start 0 --mid_buffer 10"
+            fi
+          
+            # ign sends info messages to stderr because stdout is used to pass data around
+            ign="${ign} ${args} 2> ${logs_dir}/align${id}.log"
+                                    
+            merlign="${mer}|${ign}"
+
+            prog[$id]="${merlign}; echo \"${id} complete\""
+
+            if [ "$gzip" == true ]
+            then
+                gzip_cmd="gzip ${outputs_dir}/merge_output${id}.csv -f; \
+                          gzip ${outputs_dir}/align_output${id}.csv -f"
+                prog[$id]="${prog[$id]}; ${gzip_cmd}"
+            fi
+        elif [[ ${verbose} == true ]]
+        then
+            echo "Warning: No matching R2 file for $r1_file, skipping." 
+        fi
+    
+    done
+
+    set +e
+    parallel --jobs "${njobs}" --progress ::: "${prog[@]}"
+    set -e
+
+}
+
+parse_arguments "$@"
+
+shift $((OPTIND -1))
+
+if "$test"
+then 
+  run_test
+  exit
+fi
+
+# Require at least 2 arguments: sequence directory and project name
+if [ "$#" != 3 ]; then
+  echo "Minimal usage: $0 seqs_dir proj_dir project_name but $# arguments were supplied"
+  echo "or atleast one of the flags -hVgi | -t TRUE. Call it with -h for help."
+  exit 3
+fi
+
+args=("$@")
+
+seqs_dir=${args[0]}
+proj_dir=${args[1]}
+project_name=${args[2]}
+
+logs_dir="${proj_dir}/logs/"
+outputs_dir="${proj_dir}/outputs/"
+fasta_dir="${proj_dir}/refs/"
+
+
+directories=("$logs_dir" "$outputs_dir" "$SRC" "$fasta_dir" "$seqs_dir" "$proj_dir")
+
+check_that_directories_exist "${directories[@]}"
+check_that_files_exist "${fasta_dir}/REFs.fasta"
+
+mer_settings="$(join "--end_free1 100 --end_free2 100 --begin_free1 100 "\
+                     "--begin_free2 100")"
+ign_settings=$(join "--gap_open 2 --gap_extend 2 --read_begin_free 84 "\
+                     "--read_end_free 84 --ref_begin_free 6 --ref_end_free 6")
+
+if [[ -n "$settings_file" ]]
+then
+    check_that_files_exist "$settings_file"
+    parse_merlign_settings "$settings_file"
+fi
+
+
+if "$verbose"
+then
+    print_init_info "$project_name" "$N0" "$N1" "$njobs"\
+                    "$gzip" "$Q" "$seqs_dir" "$proj_dir" "$mer_settings"\
+                    "$ign_settings"
+fi 
+
+call_merlign "$seqs_dir" "$N0" "$N1" "$debug" "$gzip" "$verbose" "$Q"
+
+if "$verbose" 
+then             
+    print_end_info 
+fi
+
+if "$debug"
+then
+  run_debug "$*" "${mer_settings}" "${ign_settings}"
+fi
+
+exit 0

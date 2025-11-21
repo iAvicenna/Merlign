@@ -1,3 +1,9 @@
+*.session
+*.ycm_extra_conf.py
+tags
+TO_DO.txt
+/myexamples/
+
 # Prerequisites
 *.d
 
@@ -51,5 +57,23 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# debug information files
-*.dwo
+# Vim files
+*.swp
+*.swo
+
+# gcov files
+*.gcov
+*.gcda
+*.gcno
+
+#ctags
+tags
+src/*.tags
+problems.log
+
+#my local files
+todo.txt
+problems.log
+./oldstuff
+
+

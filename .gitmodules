@@ -1,0 +1,6 @@
+[submodule "ext/WFA2"]
+	path = ext/WFA2
+	url = https://github.com/smarco/WFA2-lib.git
+[submodule "ext/edlib"]
+	path = ext/edlib
+	url = https://github.com/Martinsos/edlib.git

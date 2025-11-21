@@ -1,0 +1,13 @@
+==66032== Memcheck, a memory error detector
+==66032== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==66032== Using Valgrind-3.21.0.GIT and LibVEX; rerun with -h for copyright info
+==66032== Command: ../src/mer --match 0 --file1 ./test_files/simulated_reads_R1.fastq --file2 ./test_files/simulated_reads_R2.fastq --output_path ./test_files/simulated_mer_output_test.csv --merged_path ./test_files/simulated_merged_seqs_test.fastq --N1 100
+==66032== 
+==66032== 
+==66032== HEAP SUMMARY:
+==66032==     in use at exit: 0 bytes in 0 blocks
+==66032==   total heap usage: 345 allocs, 345 frees, 9,336,707 bytes allocated
+==66032== 
+==66032== All heap blocks were freed -- no leaks are possible
+==66032== 
+==66032== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
