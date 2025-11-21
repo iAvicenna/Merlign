@@ -109,7 +109,7 @@ in the /tests/ directory. You can also call
     make tests
 
 from the root directory in which case tests will be run and README will be updated based on the results of the tests.
-
+This library has only been tested on Ubuntu 20.04.
 
 ## Build Flags
 
