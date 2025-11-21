@@ -182,7 +182,7 @@ the reference, which is a sum of per position quality based errror rates.
 
 ## Parameters
 
-### Mer
+### mer
 
 <b>--file1 (-F), --file2 (-G)</b>: paths of paired reads to merge
 
@@ -208,7 +208,7 @@ at this position is recorded as a lower case letter for identification in downst
 <b>--merge_debug (-D)</b>: If 1, prints some extra information about the alignment (to merged_path 
 if supplied. otherwise to stdout, default: 0)
 
-### Ign           
+### ign           
 
 --reads (-F): path to the reads file
 
