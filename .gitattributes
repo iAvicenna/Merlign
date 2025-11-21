@@ -1,3 +1,7 @@
-* linguist-vendored
-*.c linguist-vendored=false
-*.h linguist-vendored=false
+*.c linguist-detectable=true
+*.h linguist-detectable=true
+
+examples/merlign linguist-detectable=true
+examples/merlign linguist-language=Shell
+
+* linguist-detectable=false
