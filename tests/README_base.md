@@ -264,7 +264,7 @@ is used. If you want a non-fast but single aligner, then just set for instance m
 
 ## Testing Status
 
-Alongside the unit tests done via [Check](https://libcheck.github.io/check/), 
-coverage tests are performed via [gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html)
-and memmory tests are performed via [Valgrind](https://valgrind.org/).
+Unit tests done via [Check](https://libcheck.github.io/check/), 
+which uses [gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html) and
+[Valgrind](https://valgrind.org/) to carry out coverage and memory tests.
 
