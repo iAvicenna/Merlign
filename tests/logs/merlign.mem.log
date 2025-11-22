@@ -1,13 +1,13 @@
-==66066== Memcheck, a memory error detector
-==66066== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
-==66066== Using Valgrind-3.21.0.GIT and LibVEX; rerun with -h for copyright info
-==66066== Command: ../src/ign --references ./test_files/BE92.fasta --mids ./test_files/MIDs.fasta --mid_start 0 --mid_buffer 15 --output ./test_files/simulated_ign_output_test.csv --N1 100
-==66066== 
-==66066== 
-==66066== HEAP SUMMARY:
-==66066==     in use at exit: 0 bytes in 0 blocks
-==66066==   total heap usage: 4,689 allocs, 4,689 frees, 43,624,292 bytes allocated
-==66066== 
-==66066== All heap blocks were freed -- no leaks are possible
-==66066== 
-==66066== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==138017== Memcheck, a memory error detector
+==138017== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==138017== Using Valgrind-3.21.0.GIT and LibVEX; rerun with -h for copyright info
+==138017== Command: ../src/ign --references ./test_files/BE92.fasta --mids ./test_files/MIDs.fasta --mid_start 0 --mid_buffer 15 --output ./test_files/simulated_ign_output_test.csv --N1 100
+==138017== 
+==138017== 
+==138017== HEAP SUMMARY:
+==138017==     in use at exit: 0 bytes in 0 blocks
+==138017==   total heap usage: 4,689 allocs, 4,689 frees, 43,624,292 bytes allocated
+==138017== 
+==138017== All heap blocks were freed -- no leaks are possible
+==138017== 
+==138017== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
