@@ -1,13 +1,13 @@
-==66017== Memcheck, a memory error detector
-==66017== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
-==66017== Using Valgrind-3.21.0.GIT and LibVEX; rerun with -h for copyright info
-==66017== Command: ../src/mer --file1 ./test_files/example_file1_R1.fastq.gz --file2 ./test_files/example_file1_R2.fastq.gz --N1 100 --end_free1 100 --end_free2 100 --begin_free1 100 --begin_free2 100
-==66017== 
-==66017== 
-==66017== HEAP SUMMARY:
-==66017==     in use at exit: 0 bytes in 0 blocks
-==66017==   total heap usage: 463 allocs, 463 frees, 5,212,401 bytes allocated
-==66017== 
-==66017== All heap blocks were freed -- no leaks are possible
-==66017== 
-==66017== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==137915== Memcheck, a memory error detector
+==137915== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==137915== Using Valgrind-3.21.0.GIT and LibVEX; rerun with -h for copyright info
+==137915== Command: ../src/mer --file1 ./test_files/example_file1_R1.fastq.gz --file2 ./test_files/example_file1_R2.fastq.gz --N1 100 --end_free1 100 --end_free2 100 --begin_free1 100 --begin_free2 100
+==137915== 
+==137915== 
+==137915== HEAP SUMMARY:
+==137915==     in use at exit: 0 bytes in 0 blocks
+==137915==   total heap usage: 463 allocs, 463 frees, 5,212,401 bytes allocated
+==137915== 
+==137915== All heap blocks were freed -- no leaks are possible
+==137915== 
+==137915== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
