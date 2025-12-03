@@ -2,7 +2,7 @@
 
 ## Introduction
 Merlign (or Mer|ign) is a combination of two command line tools (mer and ign)
-written in C for MERging, demultiplexing, alIGNing and trimming of ngs reads.
+written in C for MERging, demultiplexing, alIGNing and trimming of paired ngs reads.
 The main external dependancies are the blazingly fast alignment libraries
 [Edlib](https://github.com/Martinsos/edlib#building) (used for aligning MIDs)
 and [WFA2](https://github.com/smarco/WFA2-lib)
