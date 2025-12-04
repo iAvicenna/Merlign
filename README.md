@@ -11,7 +11,7 @@ Merging is achieved via the Bayesian framework described in
 [Error filtering, pair assembly and error correction for next-generation sequencing reads](https://academic.oup.com/bioinformatics/article/31/21/3476/194979?login=false). The optimal
 framework is achieved by piping the results of mer into ign (hence the name
 mer|ign) however each tool is able to operate on its own and able to produce
-output into or read input from files. There is a bash script in examples
+output into or read input from files. There is a [bash script](https://github.com/iAvicenna/Merlign/blob/main/examples/merlign) in examples
 showing how to do this in a parallelized fashion.
 
 The components of this pipeline in detail are:
