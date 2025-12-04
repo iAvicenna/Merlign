@@ -11,7 +11,7 @@ Merging is achieved via the Bayesian framework described in
 [Error filtering, pair assembly and error correction for next-generation sequencing reads](https://academic.oup.com/bioinformatics/article/31/21/3476/194979?login=false). The optimal
 framework is achieved by piping the results of mer into ign (hence the name
 mer|ign) however each tool is able to operate on its own and able to produce
-output into or read input from files. There is a bash script in examples
+output into or read input from files. There is a [bash script](https://github.com/iAvicenna/Merlign/blob/main/examples/merlign) in examples
 showing how to do this in a parallelized fashion.
 
 The components of this pipeline in detail are:
@@ -270,6 +270,6 @@ is used. If you want a non-fast but single aligner, then just set for instance m
 
 ## Testing Status
 
-Unit tests done via [Check](https://libcheck.github.io/check/),
-which uses [gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html) and
-[Valgrind](https://valgrind.org/) to carry out coverage and memory tests.
+Unit tests done via [Check](https://libcheck.github.io/check/).
+[gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html) and
+[Valgrind](https://valgrind.org/) are used to carry out coverage and memory tests.
